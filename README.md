@@ -2,6 +2,9 @@
 
 A minimalist, privacy-first meditation app with pixelated video feedback and guided breathing exercises. Built with pure HTML, CSS, and JavaScript—no dependencies required.
 
+<img width="1094" height="604" alt="image" src="https://github.com/user-attachments/assets/96bb6351-4dee-4fcd-b5a8-09510eb67610" />
+
+
 ## 🎯 Features
 
 ### Core Meditation Modes
