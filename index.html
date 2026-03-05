@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Pixel Zen - Privacy Meditation</title>
+    <title>Dot-Cross Zen - Privacy Meditation</title>
     <style>
         body {
             background-color: #0d0d0d;
@@ -256,7 +256,7 @@
             height: 320px;
             border: 4px solid #333;
             box-shadow: 0 0 20px rgba(0, 255, 157, 0.2);
-            image-rendering: pixelated; /* Critical for sharp pixels */
+            image-rendering: pixelated; /* keeps crisp overlay edges */
         }
 
         /* Breathing Guide Circle */
@@ -347,11 +347,47 @@
             }
         }
 
-        /* The canvas showing the pixel art video */
+        /* The canvas showing the dot/cross ASCII video */
         canvas {
             width: 100%;
             height: 100%;
             display: block;
+        }
+
+        /* Palette selector (4 dots, top-left) */
+        #palette-selector {
+            position: absolute;
+            top: 12px;
+            left: 12px;
+            display: flex;
+            gap: 8px;
+            z-index: 30;
+            padding: 6px 8px;
+            background: rgba(0, 0, 0, 0.45);
+            border: 1px solid rgba(0, 255, 157, 0.35);
+            border-radius: 999px;
+            backdrop-filter: blur(6px);
+        }
+
+        .palette-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 999px;
+            border: 2px solid rgba(0, 255, 157, 0.65);
+            background: transparent;
+            cursor: pointer;
+            box-shadow: 0 0 0 rgba(0, 255, 157, 0);
+            transition: transform 0.12s ease, box-shadow 0.12s ease, background 0.12s ease;
+        }
+
+        .palette-dot:hover {
+            transform: scale(1.08);
+            box-shadow: 0 0 10px rgba(0, 255, 157, 0.35);
+        }
+
+        .palette-dot[aria-pressed="true"] {
+            background: #00ff9d;
+            box-shadow: 0 0 14px rgba(0, 255, 157, 0.65);
         }
 
         /* UI Overlay */
@@ -488,6 +524,14 @@
         <div id="game-container">
             <canvas id="pixelCanvas"></canvas>
             <div class="scanlines"></div>
+
+            <!-- 4-dot palette selector -->
+            <div id="palette-selector" aria-label="Dot/Cross palette selector">
+                <button class="palette-dot" type="button" data-palette="classic" aria-label="Classic Dot-Cross" aria-pressed="true"></button>
+                <button class="palette-dot" type="button" data-palette="matrix" aria-label="Matrix Plus" aria-pressed="false"></button>
+                <button class="palette-dot" type="button" data-palette="retro" aria-label="Retro Dots" aria-pressed="false"></button>
+                <button class="palette-dot" type="button" data-palette="inverted" aria-label="Inverted Cross" aria-pressed="false"></button>
+            </div>
             
             <!-- Breathing Guide Circle -->
             <div id="breathing-guide"></div>
@@ -522,8 +566,8 @@
 
     <script>
         // CONFIGURATION
-        const PIXEL_SIZE = 12;
         const CANVAS_SIZE = 320;
+        const ASCII_FONT_SIZE = 10; // adjust for density/perf
         
         // DOM Elements
         const video = document.getElementById('webcamVideo');
@@ -544,6 +588,7 @@
         const countdownOverlay = document.getElementById('countdown-overlay');
         const breathIndicator = document.getElementById('breath-indicator');
         const modeButtons = document.querySelectorAll('.mode-btn');
+        const paletteSelector = document.getElementById('palette-selector');
 
         // State
         let isMeditating = false;
@@ -562,6 +607,46 @@
         let breathCounter = 0;
         let cameraReady = false;
         let countdownValue = 0;
+        let selectedPaletteKey = 'classic';
+
+        // ASCII palettes (dot/cross style)
+        const palettes = {
+            classic: [' ', '.', '+', 'x', 'X', '#', 'W'],
+            matrix: [' ', '.', ':', '+', '*', 'x', 'X', 'M'],
+            retro: [' ', '.', 'o', 'O', '0', '8', '@'],
+            inverted: ['@', '#', 'X', 'x', '+', '.', ' ']
+        };
+
+        const paletteTheme = {
+            classic: { bg: '#000000', fg: '#ffffff' },
+            matrix: { bg: '#052e16', fg: '#4ade80' },
+            retro: { bg: '#291c0e', fg: '#fbbf24' },
+            inverted: { bg: '#ffffff', fg: '#000000' }
+        };
+
+        // Offscreen sampling canvas for ASCII mapping
+        const sampleCanvas = document.createElement('canvas');
+        const sampleCtx = sampleCanvas.getContext('2d', { willReadFrequently: true });
+
+        function mapToAscii(brightness, palette) {
+            const idx = Math.floor((brightness / 255) * (palette.length - 1));
+            return palette[idx];
+        }
+
+        function setSelectedPalette(nextKey) {
+            if (!palettes[nextKey]) return;
+            selectedPaletteKey = nextKey;
+            const dots = paletteSelector.querySelectorAll('.palette-dot');
+            dots.forEach(btn => {
+                btn.setAttribute('aria-pressed', btn.dataset.palette === selectedPaletteKey ? 'true' : 'false');
+            });
+        }
+
+        paletteSelector.addEventListener('click', (e) => {
+            const btn = e.target.closest('.palette-dot');
+            if (!btn) return;
+            setSelectedPalette(btn.dataset.palette);
+        });
 
         // Mode descriptions
         const modeDescriptions = {
@@ -746,20 +831,50 @@
             }
         });
 
-        // Pixelation draw loop - continuous
+        // ASCII (dot/cross) draw loop - continuous
         function draw() {
-            // Always show pixelated camera feed
             if (cameraReady && video.srcObject && video.readyState === video.HAVE_ENOUGH_DATA) {
-                const w = canvas.width / PIXEL_SIZE;
-                const h = canvas.height / PIXEL_SIZE;
-                
-                // Draw from video to small buffer
-                ctx.drawImage(video, 0, 0, w, h);
-                
-                // Scale back up with pixelation effect
-                ctx.imageSmoothingEnabled = false;
-                ctx.drawImage(canvas, 0, 0, w, h, 0, 0, canvas.width, canvas.height);
-                ctx.imageSmoothingEnabled = false;
+                const charW = Math.max(4, Math.floor(ASCII_FONT_SIZE * 0.6));
+                const cols = Math.max(40, Math.floor(canvas.width / charW));
+                const rows = Math.max(25, Math.floor(canvas.height / ASCII_FONT_SIZE));
+
+                sampleCanvas.width = cols;
+                sampleCanvas.height = rows;
+
+                // Mirror effect (selfie camera)
+                sampleCtx.save();
+                sampleCtx.scale(-1, 1);
+                sampleCtx.drawImage(video, -cols, 0, cols, rows);
+                sampleCtx.restore();
+
+                const imageData = sampleCtx.getImageData(0, 0, cols, rows);
+                const pixels = imageData.data;
+                const palette = palettes[selectedPaletteKey];
+                const theme = paletteTheme[selectedPaletteKey];
+
+                // Background
+                ctx.fillStyle = theme.bg;
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+                // Text
+                ctx.fillStyle = theme.fg;
+                ctx.textBaseline = 'top';
+                ctx.textAlign = 'left';
+                ctx.font = `${ASCII_FONT_SIZE}px "Courier New", Courier, monospace`;
+
+                const lineHeight = ASCII_FONT_SIZE;
+                for (let y = 0; y < rows; y++) {
+                    let line = '';
+                    for (let x = 0; x < cols; x++) {
+                        const idx = (y * cols + x) * 4;
+                        const r = pixels[idx];
+                        const g = pixels[idx + 1];
+                        const b = pixels[idx + 2];
+                        const brightness = (0.299 * r + 0.587 * g + 0.114 * b);
+                        line += mapToAscii(brightness, palette);
+                    }
+                    ctx.fillText(line, 0, y * lineHeight);
+                }
             } else {
                 // Show placeholder when camera not ready
                 ctx.fillStyle = '#111';
@@ -782,22 +897,6 @@
                 ctx.shadowBlur = 20;
                 ctx.fillText(countdownValue, canvas.width / 2, canvas.height / 2);
                 ctx.shadowBlur = 0;
-            }
-
-            // Show grid lines only during meditation
-            if (isMeditating) {
-                ctx.strokeStyle = 'rgba(0, 255, 157, 0.1)';
-                ctx.lineWidth = 1;
-                ctx.beginPath();
-                for (let x = 0; x <= canvas.width; x += PIXEL_SIZE) {
-                    ctx.moveTo(x, 0);
-                    ctx.lineTo(x, canvas.height);
-                }
-                for (let y = 0; y <= canvas.height; y += PIXEL_SIZE) {
-                    ctx.moveTo(0, y);
-                    ctx.lineTo(canvas.width, y);
-                }
-                ctx.stroke();
             }
 
             animationId = requestAnimationFrame(draw);
@@ -885,7 +984,7 @@
                     const a = document.createElement('a');
                     a.style.display = 'none';
                     a.href = url;
-                    a.download = 'pixel_meditation_session.webm';
+                    a.download = 'dot_cross_meditation_session.webm';
                     document.body.appendChild(a);
                     a.click();
                     window.URL.revokeObjectURL(url);
