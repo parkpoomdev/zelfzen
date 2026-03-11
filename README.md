@@ -31,7 +31,10 @@ Due to browser privacy security, **you must run this app via a local server** fo
 
 ## 🎯 Features
 
-- **3 Meditation Modes**: Breathing Guide, Tempo Box, and Silent Zen.
+- **3 Meditation Modes**:
+  - **Breathing Guide**: Follow an expanding/contracting circle for a gentle 8-second breathing pace.
+  - **Tempo Box**: Track a pulsing square with quick 6-second cycles for focused rhythm.
+  - **Silent Zen**: Pure meditation with no visual guides or audio cues.
 - **Privacy First**: All processing is done completely offline in your browser. Nothing is sent to a server.
 - **Cross Dot ASCII Art**: Adjustable cross/dot text-filtering with CRT scanlines and a switchable color palette.
 - **Session History**: Easily export your sessions as sped-up WebM / GIF files, saved automatically to a local gallery grid.
