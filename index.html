@@ -368,9 +368,21 @@
             display: block;
         }
 
-        .rec-dot-top[aria-pressed="true"] {
-            background: #00ff9d;
-            box-shadow: 0 0 14px rgba(0, 255, 157, 0.65);
+        .rec-dot-top[data-palette="classic"][aria-pressed="true"] {
+            background: #ffffff;
+            box-shadow: 0 0 14px rgba(255, 255, 255, 0.65);
+        }
+        .rec-dot-top[data-palette="matrix"][aria-pressed="true"] {
+            background: #4ade80;
+            box-shadow: 0 0 14px rgba(74, 222, 128, 0.65);
+        }
+        .rec-dot-top[data-palette="retro"][aria-pressed="true"] {
+            background: #fbbf24;
+            box-shadow: 0 0 14px rgba(251, 191, 36, 0.65);
+        }
+        .rec-dot-top[data-palette="inverted"][aria-pressed="true"] {
+            background: #555555;
+            box-shadow: 0 0 14px rgba(100, 100, 100, 0.65);
         }
 
         /* UI Overlay */
@@ -464,11 +476,14 @@
         <!-- Record Panel (Top) -->
         <div id="record-panel" style="width: 320px; margin-bottom: 10px; margin-top: 0; padding-top: 0;">
             <div style="display: flex; align-items: center; gap: 10px; padding: 0 0 8px 0;">
-                <div id="palette-selector" style="display: flex; gap: 6px;">
-                    <span class="rec-dot-top palette-dot" data-palette="classic" aria-label="Classic Dot-Cross" aria-pressed="true"></span>
-                    <span class="rec-dot-top palette-dot" data-palette="matrix" aria-label="Matrix Plus" aria-pressed="false"></span>
-                    <span class="rec-dot-top palette-dot" data-palette="retro" aria-label="Retro Dots" aria-pressed="false"></span>
-                    <span class="rec-dot-top palette-dot" data-palette="inverted" aria-label="Inverted Cross" aria-pressed="false"></span>
+                <div style="display: flex; align-items: center; gap: 8px;">
+                    <span style="color: #00ff9d; font-size: 11px; text-transform: uppercase; font-weight: bold; font-family: 'Courier New', monospace;">Filter Colors:</span>
+                    <div id="palette-selector" style="display: flex; gap: 6px;">
+                        <span class="rec-dot-top palette-dot" data-palette="classic" aria-label="Classic" aria-pressed="true"></span>
+                        <span class="rec-dot-top palette-dot" data-palette="matrix" aria-label="Matrix" aria-pressed="false"></span>
+                        <span class="rec-dot-top palette-dot" data-palette="retro" aria-label="Retro" aria-pressed="false"></span>
+                        <span class="rec-dot-top palette-dot" data-palette="inverted" aria-label="Inverted" aria-pressed="false"></span>
+                    </div>
                 </div>
                 <div id="rec-progress-bar"
                     style="flex:1; height: 8px; background: #222; border-radius: 4px; margin: 0 10px; overflow: hidden;">
@@ -569,20 +584,30 @@
     <style>
         .rec-dot-top {
             display: inline-block;
-            width: 13px;
-            height: 13px;
+            width: 14px;
+            height: 14px;
             border-radius: 50%;
             background: transparent;
-            border: 2px solid rgba(0, 255, 157, 0.65);
             margin-right: 2px;
             cursor: pointer;
             transition: transform 0.12s ease, box-shadow 0.12s ease, background 0.12s ease;
         }
 
+        /* Thematically colored borders for each mode */
+        .rec-dot-top[data-palette="classic"] { border: 2px solid #ffffff; }
+        .rec-dot-top[data-palette="matrix"] { border: 2px solid #4ade80; }
+        .rec-dot-top[data-palette="retro"] { border: 2px solid #fbbf24; }
+        .rec-dot-top[data-palette="inverted"] { border: 2px solid #555555; } /* Grey for black invert */
+
         .rec-dot-top:hover {
             transform: scale(1.08);
-            box-shadow: 0 0 10px rgba(0, 255, 157, 0.35);
         }
+
+        /* Hover glows based on theme */
+        .rec-dot-top[data-palette="classic"]:hover { box-shadow: 0 0 10px rgba(255, 255, 255, 0.4); }
+        .rec-dot-top[data-palette="matrix"]:hover { box-shadow: 0 0 10px rgba(74, 222, 128, 0.4); }
+        .rec-dot-top[data-palette="retro"]:hover { box-shadow: 0 0 10px rgba(251, 191, 36, 0.4); }
+        .rec-dot-top[data-palette="inverted"]:hover { box-shadow: 0 0 10px rgba(100, 100, 100, 0.4); }
 
         .rec-dot-top.active {
             background: #00ff9d;
