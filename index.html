@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -13,7 +14,7 @@
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            height: 100vh;
+            height: 80vh;
             margin: 0;
             overflow: hidden;
         }
@@ -84,7 +85,8 @@
             box-shadow: 0 0 15px #00ff9d;
         }
 
-        input[type="range"], input[type="number"] {
+        input[type="range"],
+        input[type="number"] {
             background: #000;
             border: 1px solid #00ff9d;
             color: #00ff9d;
@@ -228,6 +230,7 @@
                 transform: scale(0.3);
                 opacity: 1;
             }
+
             100% {
                 transform: scale(1);
                 opacity: 0.8;
@@ -252,11 +255,13 @@
         /* Container for the game view */
         #game-container {
             position: relative;
-            width: 320px; /* Base size */
+            width: 320px;
+            /* Base size */
             height: 320px;
             border: 4px solid #333;
             box-shadow: 0 0 20px rgba(0, 255, 157, 0.2);
-            image-rendering: pixelated; /* keeps crisp overlay edges */
+            image-rendering: pixelated;
+            /* keeps crisp overlay edges */
         }
 
         /* Breathing Guide Circle */
@@ -279,21 +284,26 @@
         }
 
         @keyframes breathe {
-            0%, 100% {
+
+            0%,
+            100% {
                 width: 60px;
                 height: 60px;
                 border-color: rgba(0, 255, 157, 0.2);
             }
+
             25% {
                 width: 120px;
                 height: 120px;
                 border-color: rgba(0, 255, 157, 0.6);
             }
+
             50% {
                 width: 140px;
                 height: 140px;
                 border-color: rgba(0, 255, 157, 0.4);
             }
+
             75% {
                 width: 80px;
                 height: 80px;
@@ -326,19 +336,23 @@
                 border-color: rgba(0, 255, 157, 0.2);
                 box-shadow: 0 0 0 0 rgba(0, 255, 157, 0.4);
             }
+
             25% {
                 border-color: rgba(0, 255, 157, 0.8);
                 box-shadow: 0 0 20px 10px rgba(0, 255, 157, 0.3);
             }
+
             50% {
                 width: 100px;
                 height: 100px;
                 border-color: rgba(0, 255, 157, 0.6);
                 box-shadow: 0 0 30px 15px rgba(0, 255, 157, 0.2);
             }
+
             75% {
                 border-color: rgba(0, 255, 157, 0.4);
             }
+
             100% {
                 width: 80px;
                 height: 80px;
@@ -354,38 +368,7 @@
             display: block;
         }
 
-        /* Palette selector (4 dots, top-left) */
-        #palette-selector {
-            position: absolute;
-            top: 12px;
-            left: 12px;
-            display: flex;
-            gap: 8px;
-            z-index: 30;
-            padding: 6px 8px;
-            background: rgba(0, 0, 0, 0.45);
-            border: 1px solid rgba(0, 255, 157, 0.35);
-            border-radius: 999px;
-            backdrop-filter: blur(6px);
-        }
-
-        .palette-dot {
-            width: 12px;
-            height: 12px;
-            border-radius: 999px;
-            border: 2px solid rgba(0, 255, 157, 0.65);
-            background: transparent;
-            cursor: pointer;
-            box-shadow: 0 0 0 rgba(0, 255, 157, 0);
-            transition: transform 0.12s ease, box-shadow 0.12s ease, background 0.12s ease;
-        }
-
-        .palette-dot:hover {
-            transform: scale(1.08);
-            box-shadow: 0 0 10px rgba(0, 255, 157, 0.35);
-        }
-
-        .palette-dot[aria-pressed="true"] {
+        .rec-dot-top[aria-pressed="true"] {
             background: #00ff9d;
             box-shadow: 0 0 14px rgba(0, 255, 157, 0.65);
         }
@@ -402,12 +385,13 @@
             justify-content: space-between;
             padding: 20px;
             box-sizing: border-box;
-            pointer-events: none; /* Let clicks pass through to controls if needed */
+            pointer-events: none;
+            /* Let clicks pass through to controls if needed */
         }
 
         .hud-text {
             text-shadow: 1px 1px 0 #000;
-            background: rgba(0,0,0,0.5);
+            background: rgba(0, 0, 0, 0.5);
             padding: 2px 5px;
             border-radius: 4px;
         }
@@ -455,7 +439,9 @@
         }
 
         @keyframes blink {
-            50% { opacity: 0; }
+            50% {
+                opacity: 0;
+            }
         }
 
         /* Scanline effect for retro feel */
@@ -471,9 +457,29 @@
         }
     </style>
 </head>
+
 <body>
 
     <div id="main-container">
+        <!-- Record Panel (Top) -->
+        <div id="record-panel" style="width: 320px; margin-bottom: 10px; margin-top: 0; padding-top: 0;">
+            <div style="display: flex; align-items: center; gap: 10px; padding: 0 0 8px 0;">
+                <div id="palette-selector" style="display: flex; gap: 6px;">
+                    <span class="rec-dot-top palette-dot" data-palette="classic" aria-label="Classic Dot-Cross" aria-pressed="true"></span>
+                    <span class="rec-dot-top palette-dot" data-palette="matrix" aria-label="Matrix Plus" aria-pressed="false"></span>
+                    <span class="rec-dot-top palette-dot" data-palette="retro" aria-label="Retro Dots" aria-pressed="false"></span>
+                    <span class="rec-dot-top palette-dot" data-palette="inverted" aria-label="Inverted Cross" aria-pressed="false"></span>
+                </div>
+                <div id="rec-progress-bar"
+                    style="flex:1; height: 8px; background: #222; border-radius: 4px; margin: 0 10px; overflow: hidden;">
+                    <div id="rec-progress"
+                        style="height: 100%; width: 0%; background: linear-gradient(90deg, #00ff9d, #00b36b); transition: width 0.2s;">
+                    </div>
+                </div>
+                <span id="rec-timer-top"
+                    style="font-family: inherit; font-size: 1em; color: #00ff9d; min-width: 48px; text-align: right;">10:00</span>
+            </div>
+        </div>
         <!-- Settings Panel -->
         <div id="settings-panel">
             <div class="setting-group">
@@ -525,23 +531,15 @@
             <canvas id="pixelCanvas"></canvas>
             <div class="scanlines"></div>
 
-            <!-- 4-dot palette selector -->
-            <div id="palette-selector" aria-label="Dot/Cross palette selector">
-                <button class="palette-dot" type="button" data-palette="classic" aria-label="Classic Dot-Cross" aria-pressed="true"></button>
-                <button class="palette-dot" type="button" data-palette="matrix" aria-label="Matrix Plus" aria-pressed="false"></button>
-                <button class="palette-dot" type="button" data-palette="retro" aria-label="Retro Dots" aria-pressed="false"></button>
-                <button class="palette-dot" type="button" data-palette="inverted" aria-label="Inverted Cross" aria-pressed="false"></button>
-            </div>
-            
             <!-- Breathing Guide Circle -->
             <div id="breathing-guide"></div>
-            
+
             <!-- Tempo Box -->
             <div id="tempo-box"></div>
 
             <!-- Breath Indicator -->
             <div id="breath-indicator">Inhale</div>
-            
+
             <div id="ui-layer">
                 <div style="display:flex; justify-content:space-between; align-items:center;">
                     <span class="hud-text" id="modeDisplay">ZEN_MODE</span>
@@ -560,15 +558,119 @@
             <button id="btnToggle">Start Meditation</button>
             <button id="btnDownload" disabled>Download Video</button>
         </div>
+
+        <!-- GIF Grid (Session Gallery) -->
+        <div id="gif-grid"
+            style="display: flex; flex-wrap: wrap; gap: 18px; justify-content: center; margin-top: 32px;"></div>
     </div>
 
     <video id="webcamVideo" autoplay playsinline style="display:none;"></video>
 
+    <style>
+        .rec-dot-top {
+            display: inline-block;
+            width: 13px;
+            height: 13px;
+            border-radius: 50%;
+            background: transparent;
+            border: 2px solid rgba(0, 255, 157, 0.65);
+            margin-right: 2px;
+            cursor: pointer;
+            transition: transform 0.12s ease, box-shadow 0.12s ease, background 0.12s ease;
+        }
+
+        .rec-dot-top:hover {
+            transform: scale(1.08);
+            box-shadow: 0 0 10px rgba(0, 255, 157, 0.35);
+        }
+
+        .rec-dot-top.active {
+            background: #00ff9d;
+            box-shadow: 0 0 8px #00ff9d;
+        }
+
+        #gif-grid {
+            max-width: 700px;
+        }
+
+        .gif-card {
+            background: #111;
+            border: 2px solid #00ff9d;
+            border-radius: 10px;
+            overflow: hidden;
+            width: 140px;
+            height: 140px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 2px 12px #00ff9d22;
+            position: relative;
+        }
+
+        .gif-card video {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+            position: absolute;
+            top: 0;
+            left: 0;
+            z-index: 0;
+            opacity: 0.7;
+        }
+
+        .gif-card-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 0;
+            box-sizing: border-box;
+            z-index: 1;
+            pointer-events: none;
+        }
+
+        .gif-card-dots {
+            display: flex;
+            gap: 8px;
+        }
+
+        .gif-card-dot {
+            width: 7px;
+            height: 7px;
+            border-radius: 50%;
+            border: 1px solid #00ff9d;
+            background: transparent;
+        }
+
+        .gif-card-play {
+            color: rgba(0, 255, 157, 0.8);
+            font-size: 24px;
+            text-shadow: 0 0 10px rgba(0, 255, 157, 0.5);
+        }
+
+        .gif-card .gif-time {
+            background: #000;
+            border: 1px solid #00ff9d;
+            color: #00ff9d;
+            font-size: 0.75em;
+            padding: 4px 10px;
+            border-radius: 4px;
+            text-transform: uppercase;
+            font-weight: bold;
+        }
+    </style>
     <script>
         // CONFIGURATION
         const CANVAS_SIZE = 320;
         const ASCII_FONT_SIZE = 10; // adjust for density/perf
-        
+
         // DOM Elements
         const video = document.getElementById('webcamVideo');
         const canvas = document.getElementById('pixelCanvas');
@@ -590,6 +692,94 @@
         const modeButtons = document.querySelectorAll('.mode-btn');
         const paletteSelector = document.getElementById('palette-selector');
 
+        // IndexedDB configuration
+        const dbName = "DotCrossZenDB";
+        const storeName = "sessions";
+        let db;
+
+        const initDB = () => {
+            return new Promise((resolve, reject) => {
+                const request = indexedDB.open(dbName, 1);
+                request.onerror = () => reject("Error opening DB");
+                request.onsuccess = (e) => {
+                    db = e.target.result;
+                    resolve(db);
+                };
+                request.onupgradeneeded = (e) => {
+                    db = e.target.result;
+                    if (!db.objectStoreNames.contains(storeName)) {
+                        db.createObjectStore(storeName, { keyPath: "id", autoIncrement: true });
+                    }
+                };
+            });
+        };
+
+        const saveSession = (blob, durationText) => {
+            return new Promise((resolve, reject) => {
+                if (!db) return reject("DB not initialized");
+                const transaction = db.transaction([storeName], "readwrite");
+                const store = transaction.objectStore(storeName);
+                const record = {
+                    blob: blob,
+                    durationText: durationText,
+                    timestamp: Date.now()
+                };
+                const request = store.add(record);
+                request.onsuccess = (e) => resolve(e.target.result);
+                request.onerror = () => reject("Error saving session");
+            });
+        };
+
+        const loadSessions = () => {
+            return new Promise((resolve, reject) => {
+                if (!db) return resolve([]);
+                const transaction = db.transaction([storeName], "readonly");
+                const store = transaction.objectStore(storeName);
+                const request = store.getAll();
+                request.onsuccess = () => resolve(request.result);
+                request.onerror = () => reject("Error loading sessions");
+            });
+        };
+
+        const addSessionToGrid = (blob, durationText) => {
+            const url = URL.createObjectURL(blob);
+            const grid = document.getElementById('gif-grid');
+            if (grid) {
+                const card = document.createElement('div');
+                card.className = 'gif-card';
+                card.innerHTML = `
+                    <video src="${url}" autoplay loop muted playsinline></video>
+                    <div class="gif-card-overlay">
+                        <div class="gif-card-dots">
+                            <div class="gif-card-dot"></div>
+                            <div class="gif-card-dot"></div>
+                            <div class="gif-card-dot"></div>
+                            <div class="gif-card-dot"></div>
+                        </div>
+                        <div class="gif-card-play">▶</div>
+                        <div class="gif-time">${durationText}</div>
+                    </div>
+                `;
+
+                const vid = card.querySelector('video');
+                vid.onloadeddata = () => {
+                    vid.playbackRate = 2.0; // 2x speed for gif effect
+                };
+
+                grid.insertBefore(card, grid.firstChild);
+            }
+        };
+
+        // Initialize DB and load past sessions
+        initDB().then(() => {
+            loadSessions().then(sessions => {
+                sessions.sort((a, b) => a.timestamp - b.timestamp);
+                sessions.forEach(session => {
+                    addSessionToGrid(session.blob, session.durationText);
+                });
+            }).catch(e => console.error(e));
+        }).catch(e => console.error(e));
+
         // State
         let isMeditating = false;
         let isCountingDown = false;
@@ -606,6 +796,8 @@
         let breathPhase = 'inhale'; // inhale, hold, exhale
         let breathCounter = 0;
         let cameraReady = false;
+        let cameraError = false;
+        let cameraNeedsPermission = false;
         let countdownValue = 0;
         let selectedPaletteKey = 'classic';
 
@@ -670,19 +862,19 @@
         // Create beep sound with specific pitch and duration
         function playBeep(frequency = 800, duration = 100, volume = 0.3, type = 'sine') {
             initAudioContext();
-            
+
             const osc = audioContext.createOscillator();
             const gain = audioContext.createGain();
-            
+
             osc.type = type;
             osc.frequency.value = frequency;
-            
+
             gain.gain.setValueAtTime(volume * (volumeSlider.value / 100), audioContext.currentTime);
             gain.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + duration / 1000);
-            
+
             osc.connect(gain);
             gain.connect(audioContext.destination);
-            
+
             osc.start(audioContext.currentTime);
             osc.stop(audioContext.currentTime + duration / 1000);
         }
@@ -707,25 +899,58 @@
             }
         }
 
-        // Setup Camera on page load
-        async function setupCamera() {
+        // Setup Camera
+        async function setupCamera(forcePrompt = false) {
             if (cameraReady) return;
+            
+            // If it needs permission and we aren't forcing the prompt via click yet, back out.
+            if (cameraNeedsPermission && !forcePrompt) return;
+
+            cameraError = false;
+            cameraNeedsPermission = false;
             try {
                 const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: false });
                 video.srcObject = stream;
                 video.onloadedmetadata = () => {
                     cameraReady = true;
+                    // Remember that we have permission
+                    localStorage.setItem('cameraAllowed', 'true');
                     console.log('Camera ready');
                 };
             } catch (err) {
                 console.log("Camera access denied or not available");
+                cameraError = true;
             }
         }
 
         // Initialize camera on page load
-        window.addEventListener('load', () => {
-            setupCamera();
+        window.addEventListener('load', async () => {
+            // Check if we should auto-start camera
+            let shouldAutoStart = localStorage.getItem('cameraAllowed') === 'true';
+            
+            if (!shouldAutoStart && navigator.permissions) {
+                try {
+                    const perm = await navigator.permissions.query({ name: 'camera' });
+                    if (perm.state === 'granted') {
+                        shouldAutoStart = true;
+                    }
+                } catch(e) {}
+            }
+
+            if (!shouldAutoStart) {
+                 cameraNeedsPermission = true;
+            }
+            
+            // setupCamera will respect cameraNeedsPermission unless we force it
+            setupCamera(false); 
             draw(); // Start the continuous draw loop
+        });
+
+        // Click to allow camera if denied or needs click
+        canvas.addEventListener('click', () => {
+            if (!cameraReady && (cameraError || cameraNeedsPermission)) {
+                setupCamera(true); // Force the prompt since user clicked
+            }
         });
 
         // Mode button handlers
@@ -745,15 +970,15 @@
                 'tempobox': 'TEMPO BOX',
                 'silent': 'SILENT ZEN'
             };
-            
+
             document.getElementById('previewTitle').textContent = titles[meditationMode];
             document.getElementById('previewDescription').textContent = modeDescriptions[meditationMode];
-            
+
             const previewGuide = document.getElementById('previewGuide');
-            previewGuide.innerHTML = meditationMode === 'breathing' 
+            previewGuide.innerHTML = meditationMode === 'breathing'
                 ? '<div class="preview-breathing"></div>'
                 : '<div class="preview-tempobox"></div>';
-            
+
             previewModal.classList.add('show');
         }
 
@@ -788,12 +1013,12 @@
             let count = 5;
             isCountingDown = true;
             countdownOverlay.classList.add('show');
-            
+
             const countdown = setInterval(() => {
                 countdownValue = count;
                 playCountdownBeep(count);
                 count--;
-                
+
                 if (count < 0) {
                     clearInterval(countdown);
                     isCountingDown = false;
@@ -882,7 +1107,15 @@
                 ctx.fillStyle = '#00ff9d';
                 ctx.font = '12px Courier New';
                 ctx.textAlign = 'center';
-                ctx.fillText('Waiting for camera...', canvas.width / 2, canvas.height / 2);
+                if (cameraError) {
+                    ctx.fillText('Camera access denied.', canvas.width / 2, canvas.height / 2 - 15);
+                    ctx.fillText('[ CLICK TO ALLOW CAMERA ]', canvas.width / 2, canvas.height / 2 + 15);
+                } else if (cameraNeedsPermission) {
+                    ctx.fillText('Camera paused.', canvas.width / 2, canvas.height / 2 - 15);
+                    ctx.fillText('[ CLICK TO START CAMERA ]', canvas.width / 2, canvas.height / 2 + 15);
+                } else {
+                    ctx.fillText('Waiting for camera...', canvas.width / 2, canvas.height / 2);
+                }
             }
 
             // Show countdown timer on canvas during countdown
@@ -915,7 +1148,7 @@
                 // 8-second cycle: 4s inhale, 4s exhale
                 const cycleTime = 8000;
                 const elapsed = (Date.now() % cycleTime);
-                
+
                 if (elapsed < 4000) {
                     breathPhase = 'inhale';
                     breathCounter = Math.ceil((4000 - (elapsed % 4000)) / 1000);
@@ -943,7 +1176,7 @@
                 const cycleTime = 6000;
                 const elapsed = (Date.now() % cycleTime);
                 const remaining = Math.ceil((6000 - elapsed) / 1000);
-                
+
                 if (remaining <= 2) {
                     breathIndicator.textContent = `READY (${remaining}s)`;
                 } else {
@@ -971,7 +1204,7 @@
         function startRecording() {
             const stream = canvas.captureStream(30);
             mediaRecorder = new MediaRecorder(stream, { mimeType: 'video/webm' });
-            
+
             mediaRecorder.ondataavailable = (event) => {
                 if (event.data.size > 0) recordedChunks.push(event.data);
             };
@@ -987,8 +1220,21 @@
                     a.download = 'dot_cross_meditation_session.webm';
                     document.body.appendChild(a);
                     a.click();
-                    window.URL.revokeObjectURL(url);
                 };
+
+                // Save to IndexedDB and add to gif grid
+                const durationVal = durationInput.value;
+                const minText = durationVal === '1' ? '1 Min' : `${durationVal} Mins`;
+
+                saveSession(blob, minText)
+                    .then(() => {
+                        addSessionToGrid(blob, minText);
+                    })
+                    .catch(e => {
+                        console.error("Failed to save session to IndexedDB:", e);
+                        // Still display it even if DB write fails
+                        addSessionToGrid(blob, minText);
+                    });
             };
 
             mediaRecorder.start();
@@ -1002,12 +1248,17 @@
             recDot.style.display = 'none';
         }
 
-        // Timer
+        // Timer (syncs both main and top panel)
         function updateTimer() {
             const minutes = Math.floor(timeLeft / 60);
             const seconds = timeLeft % 60;
-            timerDisplay.textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
-            
+            const timeStr = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+            timerDisplay.textContent = timeStr;
+            document.getElementById('rec-timer-top').textContent = timeStr;
+            // Progress bar
+            const duration = parseInt(durationInput.value) * 60;
+            const percent = 100 - (timeLeft / duration) * 100;
+            document.getElementById('rec-progress').style.width = percent + '%';
             if (timeLeft > 0) {
                 timeLeft--;
             } else {
@@ -1019,7 +1270,7 @@
         function updateVisualGuide() {
             breathingGuide.classList.remove('active');
             tempoBox.classList.remove('active');
-            
+
             if (isMeditating) {
                 if (meditationMode === 'breathing') {
                     breathingGuide.classList.add('active');
@@ -1046,21 +1297,30 @@
             btnToggle.style.color = "#ff5555";
             settingsPanel.style.opacity = "0.5";
             settingsPanel.style.pointerEvents = "none";
-            
+
+            // Reset record panel
+            document.getElementById('rec-progress').style.width = '0%';
+            document.getElementById('rec-timer-top').textContent = `${duration.toString().padStart(2, '0')}:00`;
+            // Animate dots
+            document.querySelectorAll('.rec-dot-top').forEach(dot => dot.classList.remove('active'));
+            document.querySelectorAll('.rec-dot-top').forEach((dot, i) => {
+                setTimeout(() => dot.classList.add('active'), i * 120);
+            });
+
             lastBreathBeepTime = 0; // Reset beep timer
             updateVisualGuide();
             updateModeDisplay();
             draw();
             startRecording();
-            
+
             if (meditationMode !== 'silent') {
                 startMeditationSound();
             }
-            
+
             timerInterval = setInterval(updateTimer, 1000);
             const breathRhythmInterval = setInterval(manageBreathRhythm, 100);
             updateTimer();
-            
+
             // Store interval ID for cleanup
             btnToggle.breathRhythmInterval = breathRhythmInterval;
         }
@@ -1077,27 +1337,32 @@
             }
             stopRecording();
             stopMeditationSound();
-            
+
             // Don't stop camera - keep it running for welcome page
-            
+
             btnToggle.textContent = "Start Meditation";
             btnToggle.style.borderColor = "#00ff9d";
             btnToggle.style.color = "#00ff9d";
             settingsPanel.style.opacity = "1";
             settingsPanel.style.pointerEvents = "auto";
-            
+
             previewModal.classList.remove('show');
             countdownOverlay.classList.remove('show');
-            
+
             breathingGuide.classList.remove('active');
             tempoBox.classList.remove('active');
             breathIndicator.textContent = 'Ready';
-            
+
+            // Reset record panel
+            document.getElementById('rec-progress').style.width = '0%';
+            document.getElementById('rec-timer-top').textContent = `${parseInt(durationInput.value).toString().padStart(2, '0')}:00`;
+            document.querySelectorAll('.rec-dot-top').forEach(dot => dot.classList.remove('active'));
+
             // Reset timer display
             const duration = parseInt(durationInput.value);
             timeLeft = duration * 60;
             updateTimer();
-            
+
             // Restart draw loop to show camera preview
             draw();
         }
@@ -1114,29 +1379,29 @@
         // Start meditation sound (ambient)
         function startMeditationSound() {
             if (isAudioPlaying) return;
-            
+
             initAudioContext();
-            
+
             oscillator = audioContext.createOscillator();
             gainNode = audioContext.createGain();
-            
+
             oscillator.type = 'sine';
             oscillator.frequency.value = 40; // Very low frequency
-            
+
             gainNode.gain.setValueAtTime(0, audioContext.currentTime);
             gainNode.gain.linearRampToValueAtTime(0.08 * (volumeSlider.value / 100), audioContext.currentTime + 1);
-            
+
             oscillator.connect(gainNode);
             gainNode.connect(audioContext.destination);
             oscillator.start(audioContext.currentTime);
-            
+
             isAudioPlaying = true;
         }
 
         // Stop meditation sound
         function stopMeditationSound() {
             if (!isAudioPlaying || !oscillator) return;
-            
+
             gainNode.gain.setValueAtTime(gainNode.gain.value, audioContext.currentTime);
             gainNode.gain.linearRampToValueAtTime(0, audioContext.currentTime + 0.5);
             oscillator.stop(audioContext.currentTime + 0.5);
@@ -1157,4 +1422,5 @@
         updateModeDisplay();
     </script>
 </body>
+
 </html>
