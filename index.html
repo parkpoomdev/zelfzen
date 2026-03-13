@@ -25,6 +25,7 @@
             flex-direction: column;
             align-items: center;
             gap: 20px;
+            padding-top: 36px;
         }
 
         /* Mode selector and settings */
@@ -473,28 +474,7 @@
 <body>
 
     <div id="main-container">
-        <!-- Record Panel (Top) -->
-        <div id="record-panel" style="width: 320px; margin-bottom: 10px; margin-top: 0; padding-top: 0;">
-            <div style="display: flex; align-items: center; gap: 10px; padding: 0 0 8px 0;">
-                <div style="display: flex; align-items: center; gap: 8px;">
-                    <span style="color: #00ff9d; font-size: 11px; text-transform: uppercase; font-weight: bold; font-family: 'Courier New', monospace;">Filter Colors:</span>
-                    <div id="palette-selector" style="display: flex; gap: 6px;">
-                        <span class="rec-dot-top palette-dot" data-palette="classic" aria-label="Classic" aria-pressed="true"></span>
-                        <span class="rec-dot-top palette-dot" data-palette="matrix" aria-label="Matrix" aria-pressed="false"></span>
-                        <span class="rec-dot-top palette-dot" data-palette="retro" aria-label="Retro" aria-pressed="false"></span>
-                        <span class="rec-dot-top palette-dot" data-palette="inverted" aria-label="Inverted" aria-pressed="false"></span>
-                    </div>
-                </div>
-                <div id="rec-progress-bar"
-                    style="flex:1; height: 8px; background: #222; border-radius: 4px; margin: 0 10px; overflow: hidden;">
-                    <div id="rec-progress"
-                        style="height: 100%; width: 0%; background: linear-gradient(90deg, #00ff9d, #00b36b); transition: width 0.2s;">
-                    </div>
-                </div>
-                <span id="rec-timer-top"
-                    style="font-family: inherit; font-size: 1em; color: #00ff9d; min-width: 48px; text-align: right;">10:00</span>
-            </div>
-        </div>
+
         <!-- Settings Panel -->
         <div id="settings-panel">
             <div class="setting-group">
@@ -542,6 +522,7 @@
             <div class="countdown-number" id="countdownNumber">3</div>
         </div>
 
+
         <div id="game-container">
             <canvas id="pixelCanvas"></canvas>
             <div class="scanlines"></div>
@@ -569,15 +550,44 @@
             </div>
         </div>
 
+
+
+        <!-- Filter Color and Time Progress Panel -->
+        <div id="filter-timeline-panel" style="display: flex; align-items: center; justify-content: center; gap: 18px;">
+            <div style="display: flex; align-items: center; gap: 10px;">
+                <span style="color: #00ff9d; font-size: 11px; text-transform: uppercase; font-weight: bold; font-family: 'Courier New', monospace;">Filter Colors:</span>
+                <div id="palette-selector" style="display: flex; gap: 6px;">
+                    <span class="rec-dot-top palette-dot" data-palette="classic" aria-label="Classic" aria-pressed="true"></span>
+                    <span class="rec-dot-top palette-dot" data-palette="matrix" aria-label="Matrix" aria-pressed="false"></span>
+                    <span class="rec-dot-top palette-dot" data-palette="retro" aria-label="Retro" aria-pressed="false"></span>
+                    <span class="rec-dot-top palette-dot" data-palette="inverted" aria-label="Inverted" aria-pressed="false"></span>
+                </div>
+            </div>
+            <div id="rec-progress-bar"
+                style="flex:1; height: 8px; background: #222; border-radius: 4px; min-width: 180px; max-width: 300px; overflow: hidden;">
+                <div id="rec-progress"
+                    style="height: 100%; width: 0%; background: linear-gradient(90deg, #00ff9d, #00b36b); transition: width 0.2s;">
+                </div>
+            </div>
+            <span id="rec-timer-top"
+                style="font-family: inherit; font-size: 1em; color: #00ff9d; min-width: 48px; text-align: right;">10:00</span>
+        </div>
+
+
+
         <div id="controls">
             <button id="btnToggle">Start Meditation</button>
             <button id="btnDownload" disabled>Download Video</button>
         </div>
 
-        <!-- GIF Grid (Session Gallery) -->
-        <div id="gif-grid"
-            style="display: flex; flex-wrap: wrap; gap: 18px; justify-content: center; margin-top: 32px;"></div>
+
+
+
     </div>
+
+    <!-- GIF Grid (Session Gallery) - now outside main-container -->
+    <div id="gif-grid"
+        style="display: flex; flex-wrap: wrap; gap: 18px; justify-content: center; margin-top: 32px;"></div>
 
     <video id="webcamVideo" autoplay playsinline style="display:none;"></video>
 
@@ -731,6 +741,32 @@
         }
     </style>
     <script>
+    // --- Video Thumbnail Timeline Preview ---
+    const videoThumbnail = document.getElementById('video-thumbnail');
+    const previewVideo = document.getElementById('preview-video');
+    const timelineBar = document.getElementById('timeline-bar');
+    const timelineProgress = document.getElementById('timeline-progress');
+
+    if (videoThumbnail && previewVideo && timelineBar && timelineProgress) {
+        videoThumbnail.addEventListener('mousemove', (e) => {
+            const rect = videoThumbnail.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const percent = Math.max(0, Math.min(1, x / rect.width));
+            timelineProgress.style.width = (percent * 100) + '%';
+            if (previewVideo.duration) {
+                previewVideo.currentTime = percent * previewVideo.duration;
+            }
+        });
+        videoThumbnail.addEventListener('mouseenter', () => {
+            previewVideo.play();
+            previewVideo.muted = true;
+        });
+        videoThumbnail.addEventListener('mouseleave', () => {
+            timelineProgress.style.width = '0%';
+            previewVideo.pause();
+            previewVideo.currentTime = 0;
+        });
+    }
         // CONFIGURATION
         const CANVAS_SIZE = 320;
         const ASCII_FONT_SIZE = 10; // adjust for density/perf
@@ -824,8 +860,14 @@
                 const card = document.createElement('div');
                 card.className = 'gif-card';
                 card.dataset.id = id;
+                // We'll update the .gif-time text after loading video duration
                 card.innerHTML = `
-                    <video src="${url}" loop muted playsinline defaultPlaybackRate="2.0"></video>
+                    <div class="gif-card-video-container" style="position: relative; width: 180px; height: 100px; background: #222; border-radius: 6px; overflow: hidden;">
+                        <video src="${url}" loop muted playsinline style="width: 100%; height: 100%; object-fit: cover;"></video>
+                        <div class="gif-timeline-bar" style="position: absolute; left: 0; bottom: 0; height: 5px; width: 100%; background: rgba(0,0,0,0.4);">
+                            <div class="gif-timeline-progress" style="height: 100%; width: 0%; background: linear-gradient(90deg, #00ff9d, #00b36b);"></div>
+                        </div>
+                    </div>
                     <div class="gif-card-overlay">
                         <div class="gif-card-top-row">
                             <div class="gif-card-dots">
@@ -838,7 +880,7 @@
                         </div>
                         <div class="gif-card-play">▶</div>
                         <div class="gif-card-bottom-row">
-                            <div class="gif-time">${durationText}</div>
+                            <div class="gif-time">Loading...</div>
                         </div>
                     </div>
                 `;
@@ -853,6 +895,40 @@
                 vid.onpause = () => {
                     card.classList.remove('playing');
                 };
+
+                // Show real duration after metadata loads
+                vid.addEventListener('loadedmetadata', () => {
+                    const realMins = (vid.duration / 60).toFixed(1);
+                    // Extract planned duration in minutes from durationText (e.g., '10 Mins' or '1 Min')
+                    let planned = durationText.match(/\d+/);
+                    planned = planned ? planned[0] : '?';
+                    card.querySelector('.gif-time').textContent = `Session ${realMins} / ${planned} mins`;
+                });
+
+                // Timeline preview logic
+                const videoContainer = card.querySelector('.gif-card-video-container');
+                const timelineBar = card.querySelector('.gif-timeline-bar');
+                const timelineProgress = card.querySelector('.gif-timeline-progress');
+                if (videoContainer && timelineBar && timelineProgress) {
+                    videoContainer.addEventListener('mousemove', (e) => {
+                        const rect = videoContainer.getBoundingClientRect();
+                        const x = e.clientX - rect.left;
+                        const percent = Math.max(0, Math.min(1, x / rect.width));
+                        timelineProgress.style.width = (percent * 100) + '%';
+                        if (vid.duration) {
+                            vid.currentTime = percent * vid.duration;
+                        }
+                    });
+                    videoContainer.addEventListener('mouseenter', () => {
+                        vid.play();
+                        vid.muted = true;
+                    });
+                    videoContainer.addEventListener('mouseleave', () => {
+                        timelineProgress.style.width = '0%';
+                        vid.pause();
+                        vid.currentTime = 0;
+                    });
+                }
 
                 card.addEventListener('click', (e) => {
                     if (e.target.classList.contains('gif-card-delete')) return;

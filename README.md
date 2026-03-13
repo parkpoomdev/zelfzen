@@ -58,3 +58,11 @@ Due to browser privacy security, **you must run this app via a local server** fo
 
 ## 📄 License
 MIT License - Free to use, modify, and distribute.
+
+---
+
+## 🖼️ New Meditation Grid UI
+
+![Meditation Grid UI](meditate_gird.png)
+
+This is the new thumbnail for the meditation grid, as shown in the updated UI. The image demonstrates the layout with the filter color selector, timer bar, and session cards below the main video area.
