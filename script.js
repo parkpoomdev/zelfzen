@@ -779,20 +779,162 @@ let meditationMode = 'balance';
     previewModal.classList.add('show');
 }
 
-        // Preview sound button
+        // Preview sound: simulate one full breathing cycle
+        let previewTimer = null;
+        let previewTimeout = null;
+        let previewAnimationId = null;
+        let previewAnimationStart = 0;
+
+        function stopPreviewSound() {
+            if (previewTimer) {
+                clearInterval(previewTimer);
+                previewTimer = null;
+            }
+            if (previewTimeout) {
+                clearTimeout(previewTimeout);
+                previewTimeout = null;
+            }
+            if (previewAnimationId) {
+                cancelAnimationFrame(previewAnimationId);
+                previewAnimationId = null;
+            }
+            stopMeditationSound();
+        }
+
+        function runPreviewAnimation(mode) {
+            const previewGuide = document.getElementById('previewGuide');
+            const visualElement = previewGuide ? previewGuide.querySelector('div') : null;
+            if (!mode || !mode.breathingPattern || mode.breathingPattern === 'natural' || !visualElement) {
+                return;
+            }
+
+            const pattern = mode.breathingPattern;
+            const totalCycleTime = pattern.reduce((sum, p) => sum + p.duration, 0);
+            previewAnimationStart = Date.now();
+
+            const animate = () => {
+                if (!previewAnimationId) return;
+
+                const elapsed = (Date.now() - previewAnimationStart) % totalCycleTime;
+                let cumulativeTime = 0;
+                let currentPhaseIndex = 0;
+                for (let i = 0; i < pattern.length; i++) {
+                    if (elapsed < cumulativeTime + pattern[i].duration) {
+                        currentPhaseIndex = i;
+                        break;
+                    }
+                    cumulativeTime += pattern[i].duration;
+                }
+
+                const currentPhase = pattern[currentPhaseIndex];
+                const phaseElapsedTime = elapsed - cumulativeTime;
+                const progress = currentPhase.duration > 0 ? phaseElapsedTime / currentPhase.duration : 0;
+
+                const visualSettings = mode.visual || {};
+                const minSize = Number.isFinite(visualSettings.minSize) ? visualSettings.minSize : 60;
+                const maxSize = Number.isFinite(visualSettings.maxSize) ? visualSettings.maxSize : 200;
+                const maxScale = maxSize / Math.max(1, minSize);
+                const currentScale = visualElement.style.transform.match(/scale\(([^)]+)\)/);
+                const currentScaleValue = currentScale ? parseFloat(currentScale[1]) : 1;
+
+                switch (currentPhase.phase) {
+                    case 'inhale':
+                        visualElement.style.transform = `scale(${1 + progress * (maxScale - 1)})`;
+                        break;
+                    case 'exhale':
+                        visualElement.style.transform = `scale(${maxScale - progress * (maxScale - 1)})`;
+                        break;
+                    case 'hold':
+                        if (meditationMode === 'box') {
+                            const pulse = Math.sin(phaseElapsedTime / 200) * 0.05;
+                            visualElement.style.transform = `scale(${maxScale + pulse})`;
+                        } else {
+                            visualElement.style.transform = `scale(${maxScale})`;
+                        }
+                        break;
+                    case 'transition':
+                        visualElement.style.transform = `scale(${currentScaleValue})`;
+                        break;
+                }
+
+                previewAnimationId = requestAnimationFrame(animate);
+            };
+
+            previewAnimationId = requestAnimationFrame(animate);
+        }
+
+        function runPreviewCycle() {
+            const mode = modes[meditationMode];
+            if (!mode || !mode.audio) return;
+
+            stopPreviewSound();
+            startMeditationSound(meditationMode);
+            runPreviewAnimation(mode);
+
+            if (!mode.breathingPattern || mode.breathingPattern === 'natural') {
+                // Zen/metronome: play a few ticks then stop
+                previewTimeout = setTimeout(stopPreviewSound, 5000);
+                return;
+            }
+
+            const pattern = mode.breathingPattern;
+            const totalCycleTime = pattern.reduce((sum, p) => sum + p.duration, 0);
+            const previewStart = Date.now();
+
+            previewTimer = setInterval(() => {
+                const elapsed = (Date.now() - previewStart);
+                if (elapsed >= totalCycleTime) {
+                    stopPreviewSound();
+                    return;
+                }
+
+                let cumulativeTime = 0;
+                let currentPhaseIndex = 0;
+                for (let i = 0; i < pattern.length; i++) {
+                    if (elapsed < cumulativeTime + pattern[i].duration) {
+                        currentPhaseIndex = i;
+                        break;
+                    }
+                    cumulativeTime += pattern[i].duration;
+                }
+
+                const currentPhase = pattern[currentPhaseIndex];
+                const phaseElapsedTime = elapsed - cumulativeTime;
+
+                manageBreathAudioPhase(meditationMode, currentPhase, phaseElapsedTime);
+
+                if (mode.audio && mode.audio.pattern !== 'metronome') {
+                    let audioPhase = currentPhase.phase;
+                    let audioPhaseElapsed = phaseElapsedTime;
+                    let audioPhaseDuration = currentPhase.duration;
+                    if (audioPhase === 'transition') {
+                        const nextPhase = pattern[(currentPhaseIndex + 1) % pattern.length];
+                        if (nextPhase) {
+                            audioPhase = nextPhase.phase;
+                            const mappedElapsed = (currentPhase.duration > 0)
+                                ? (phaseElapsedTime / currentPhase.duration) * nextPhase.duration
+                                : 0;
+                            audioPhaseElapsed = mappedElapsed;
+                            audioPhaseDuration = nextPhase.duration;
+                        }
+                    }
+                    manageBreathAudio(meditationMode, audioPhase, audioPhaseElapsed, audioPhaseDuration);
+                }
+            }, 50);
+        }
+
         document.getElementById('previewPlaySound').addEventListener('click', () => {
             if (meditationMode === 'silent') {
                 alert('Silent mode has no sound');
                 return;
             }
-            // Play a quick preview of the meditation sound
-            playBeep(50, 500, 0.2);
-            setTimeout(() => playBeep(50, 200, 0.15), 600);
+            runPreviewCycle();
         });
 
         // Preview cancel
         document.getElementById('previewCancel').addEventListener('click', () => {
             previewModal.classList.remove('show');
+            stopPreviewSound();
             // Ensure countdown is hidden and reset
             countdownOverlay.classList.remove('show');
             isCountingDown = false;
@@ -806,6 +948,7 @@ let meditationMode = 'balance';
         // Preview start
         document.getElementById('previewStart').addEventListener('click', () => {
             previewModal.classList.remove('show');
+            stopPreviewSound();
             startCountdown();
         });
 
